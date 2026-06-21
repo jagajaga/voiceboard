@@ -44,6 +44,12 @@ class VoiceIMEService : InputMethodService() {
     // ── Recording ──────────────────────────────────────────────────────────────
 
     private fun startRecording() {
+        // Guard: require API key before even starting
+        if (!Prefs.hasApiKey(applicationContext)) {
+            tvStatus.text = "⚠ No API key — open VoiceBoard app to set it"
+            return
+        }
+
         val file = File(cacheDir, "voiceboard_${System.currentTimeMillis()}.m4a")
         audioFile = file
 
@@ -80,17 +86,16 @@ class VoiceIMEService : InputMethodService() {
             recorder = null
         }
 
-        val file = audioFile ?: run {
-            reset(); return
-        }
+        val file = audioFile ?: run { reset(); return }
 
         scope.launch {
+            val apiKey = Prefs.getApiKey(applicationContext)
             val text = withContext(Dispatchers.IO) {
                 runCatching {
                     WhisperApi.transcribe(
                         audioFile = file,
-                        apiKey    = BuildConfig.OPENAI_API_KEY,
-                        model     = BuildConfig.WHISPER_MODEL,
+                        apiKey    = apiKey,
+                        model     = Prefs.getModel(applicationContext),
                     )
                 }
             }
@@ -99,7 +104,6 @@ class VoiceIMEService : InputMethodService() {
 
             text.onSuccess { transcript ->
                 if (transcript.isNotEmpty()) {
-                    // Append a trailing space so the next word doesn't merge
                     currentInputConnection?.commitText("$transcript ", 1)
                     tvStatus.text = "✓ Done"
                 } else {

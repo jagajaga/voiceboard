@@ -22,11 +22,6 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Inject API key into local.properties
-        run: |
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> local.properties
-          echo "WHISPER_MODEL=gpt-4o-transcribe"             >> local.properties
-
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
 
