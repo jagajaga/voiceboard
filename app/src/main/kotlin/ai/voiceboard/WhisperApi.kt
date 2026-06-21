@@ -8,7 +8,11 @@ import java.io.IOException
 
 object WhisperApi {
 
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
 
     /**
      * Transcribe [audioFile] (M4A/AAC) using the OpenAI Whisper-compatible endpoint.
