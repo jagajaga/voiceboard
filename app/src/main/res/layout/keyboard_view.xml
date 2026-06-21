@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="#1A1A2E"
-    android:padding="16dp">
+    android:padding="12dp">
 
     <!-- Status / transcript preview -->
     <TextView
@@ -15,19 +15,52 @@
         android:textColor="#AAAACC"
         android:textSize="13sp"
         android:gravity="center"
-        android:minHeight="28dp"
-        android:paddingBottom="8dp" />
+        android:minHeight="24dp"
+        android:paddingBottom="6dp" />
 
     <!-- Main record button -->
     <Button
         android:id="@+id/btnRecord"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="68dp"
         android:text="🎤  Record"
         android:textSize="20sp"
         android:textColor="#FFFFFF"
         android:backgroundTint="#3A3A6E"
         android:stateListAnimator="@null"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="8dp" />
+
+    <!-- Bottom row: Delete + Switch keyboard -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="⌫  Delete"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4A2A2A"
+            android:stateListAnimator="@null"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/btnSwitch"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="⌨  Keyboard"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2A3A4A"
+            android:stateListAnimator="@null"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

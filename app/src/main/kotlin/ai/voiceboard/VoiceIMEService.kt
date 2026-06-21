@@ -3,7 +3,9 @@ package ai.voiceboard
 import android.inputmethodservice.InputMethodService
 import android.media.MediaRecorder
 import android.os.Build
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.coroutines.*
@@ -31,6 +33,31 @@ class VoiceIMEService : InputMethodService() {
             if (isRecording) stopRecording() else startRecording()
         }
 
+        // ⌫ Delete: removes selected text, or one character before the cursor
+        view.findViewById<Button>(R.id.btnDelete).setOnClickListener {
+            val ic = currentInputConnection ?: return@setOnClickListener
+            val selected = ic.getSelectedText(0)
+            if (!selected.isNullOrEmpty()) {
+                // Replace selection with nothing
+                ic.commitText("", 1)
+            } else {
+                // Standard backspace
+                ic.deleteSurroundingText(1, 0)
+            }
+        }
+
+        // ⌨ Switch: go back to the previously used keyboard
+        view.findViewById<Button>(R.id.btnSwitch).setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // API 28+: switch directly to the last-used IME (no picker needed)
+                switchToLastInputMethod()
+            } else {
+                // Older: show the system IME picker
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showInputMethodPicker()
+            }
+        }
+
         return view
     }
 
@@ -44,7 +71,6 @@ class VoiceIMEService : InputMethodService() {
     // ── Recording ──────────────────────────────────────────────────────────────
 
     private fun startRecording() {
-        // Guard: require API key before even starting
         if (!Prefs.hasApiKey(applicationContext)) {
             tvStatus.text = "⚠ No API key — open VoiceBoard app to set it"
             return
