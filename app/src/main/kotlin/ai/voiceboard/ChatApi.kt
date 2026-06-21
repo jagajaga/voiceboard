@@ -10,14 +10,14 @@ object ChatApi {
     private val client = OkHttpClient()
 
     /**
-     * Rephrase [originalText] according to [instruction] using GPT-4o-mini.
+     * Rephrase [originalText] according to [instruction] using o3.
      * Returns only the rephrased text, no extra explanation.
      */
     @Throws(IOException::class)
     fun rephrase(originalText: String, instruction: String, apiKey: String): String {
         val json = """
             {
-              "model": "gpt-4o-mini",
+              "model": "o3",
               "messages": [
                 {
                   "role": "system",
@@ -28,7 +28,6 @@ object ChatApi {
                   "content": "Original text:\n${originalText.replace("\"", "\\\"")}\n\nInstruction: ${instruction.replace("\"", "\\\"")}"
                 }
               ],
-              "temperature": 0.7
             }
         """.trimIndent()
 
