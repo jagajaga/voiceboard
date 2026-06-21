@@ -18,6 +18,19 @@
         android:minHeight="20dp"
         android:paddingBottom="6dp" />
 
+    <!-- Rephrase button — visible only when text is selected -->
+    <Button
+        android:id="@+id/btnRephrase"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:text="✏️  Rephrase selection"
+        android:textSize="14sp"
+        android:textColor="#E8EDE3"
+        android:backgroundTint="#2A3828"
+        android:stateListAnimator="@null"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone" />
+
     <!-- Main record button -->
     <Button
         android:id="@+id/btnRecord"
