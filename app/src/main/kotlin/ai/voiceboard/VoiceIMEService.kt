@@ -217,7 +217,7 @@ class VoiceIMEService : InputMethodService() {
                 resetUI(); return@launch
             }
 
-            tvStatus.text = "\"${instruction.getOrDefault("")}\" …"
+            tvStatus.text = "\"${instruction.getOrDefault("")}\""
 
             // Step 2: rephrase with GPT-4o-mini
             val rephrased = withContext(Dispatchers.IO) {
