@@ -10,14 +10,14 @@ object ChatApi {
     private val client = OkHttpClient()
 
     /**
-     * Rephrase [originalText] according to [instruction] using o3.
+     * Rephrase [originalText] according to [instruction] using gpt-5.5.
      * Returns only the rephrased text, no extra explanation.
      */
     @Throws(IOException::class)
     fun rephrase(originalText: String, instruction: String, apiKey: String): String {
         val json = """
             {
-              "model": "o3",
+              "model": "gpt-5.5",
               "messages": [
                 {
                   "role": "system",
