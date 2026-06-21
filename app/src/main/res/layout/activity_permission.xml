@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A2E">
+    android:background="#141A12">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="VoiceBoard Setup"
-            android:textColor="#FFFFFF"
+            android:textColor="#E8EDE3"
             android:textSize="26sp"
             android:textStyle="bold"
             android:layout_marginBottom="12dp" />
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Step 1: grant microphone access.\nStep 2: enable VoiceBoard in Settings.\nStep 3: paste your OpenAI key below."
-            android:textColor="#AAAACC"
+            android:textColor="#7A8A74"
             android:textSize="14sp"
             android:gravity="center"
             android:layout_marginBottom="24dp" />
@@ -43,8 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:text="Grant Microphone Permission"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#3A3A6E"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#3A4438"
             android:layout_marginBottom="12dp" />
 
         <!-- Step 2: enable IME -->
@@ -53,8 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:text="Open Input Method Settings"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#2A2A5E"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#2D3830"
             android:layout_marginBottom="28dp" />
 
         <!-- Step 3: API key -->
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="OpenAI API Key"
-            android:textColor="#CCCCEE"
+            android:textColor="#A8B4A2"
             android:textSize="13sp"
             android:layout_marginBottom="6dp" />
 
@@ -71,9 +71,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="sk-..."
-            android:textColor="#FFFFFF"
-            android:textColorHint="#666688"
-            android:background="#2A2A4E"
+            android:textColor="#E8EDE3"
+            android:textColorHint="#4A5A44"
+            android:background="#1E2820"
             android:padding="12dp"
             android:inputType="textPassword"
             android:imeOptions="actionDone"
@@ -86,8 +86,8 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:text="Save Key"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#3A3A6E"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#3A4438"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -95,7 +95,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text=""
-            android:textColor="#88CC88"
+            android:textColor="#7A9A74"
             android:textSize="13sp"
             android:gravity="center" />
 

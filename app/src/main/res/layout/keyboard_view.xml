@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#1A1A2E"
+    android:background="#141A12"
     android:padding="12dp">
 
     <!-- Status / transcript preview -->
@@ -12,10 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="#AAAACC"
-        android:textSize="13sp"
+        android:textColor="#7A8A74"
+        android:textSize="12sp"
         android:gravity="center"
-        android:minHeight="24dp"
+        android:minHeight="20dp"
         android:paddingBottom="6dp" />
 
     <!-- Main record button -->
@@ -24,9 +24,9 @@
         android:layout_width="match_parent"
         android:layout_height="68dp"
         android:text="🎤  Record"
-        android:textSize="20sp"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#3A3A6E"
+        android:textSize="19sp"
+        android:textColor="#E8EDE3"
+        android:backgroundTint="#3A4438"
         android:stateListAnimator="@null"
         android:layout_marginBottom="8dp" />
 
@@ -40,24 +40,24 @@
         <Button
             android:id="@+id/btnDelete"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
             android:text="⌫  Delete"
-            android:textSize="15sp"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4A2A2A"
+            android:textSize="14sp"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#2D3830"
             android:stateListAnimator="@null"
             android:layout_marginEnd="4dp" />
 
         <Button
             android:id="@+id/btnSwitch"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
             android:text="⌨  Keyboard"
-            android:textSize="15sp"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#2A3A4A"
+            android:textSize="14sp"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#3A4438"
             android:stateListAnimator="@null"
             android:layout_marginStart="4dp" />
 

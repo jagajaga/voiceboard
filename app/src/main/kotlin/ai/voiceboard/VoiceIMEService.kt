@@ -88,7 +88,7 @@ class VoiceIMEService : InputMethodService() {
         isRecording = true
         btnRecord.text = "⏹  Stop"
         btnRecord.backgroundTintList =
-            android.content.res.ColorStateList.valueOf(0xFFB03030.toInt())
+            android.content.res.ColorStateList.valueOf(0xFF5C2A2A.toInt())
         tvStatus.text = "Recording…"
     }
 
@@ -140,6 +140,6 @@ class VoiceIMEService : InputMethodService() {
         btnRecord.isEnabled = true
         btnRecord.text = "🎤  Record"
         btnRecord.backgroundTintList =
-            android.content.res.ColorStateList.valueOf(0xFF3A3A6E.toInt())
+            android.content.res.ColorStateList.valueOf(0xFF3A4438.toInt())
     }
 }
