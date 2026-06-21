@@ -3,7 +3,6 @@ package ai.voiceboard
 import android.inputmethodservice.InputMethodService
 import android.media.MediaRecorder
 import android.os.Build
-import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -46,16 +45,10 @@ class VoiceIMEService : InputMethodService() {
             }
         }
 
-        // ⌨ Switch: go back to the previously used keyboard
+        // ⌨ Switch: show the system keyboard picker so the user can jump to Gboard etc.
         view.findViewById<Button>(R.id.btnSwitch).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                // API 28+: switch directly to the last-used IME (no picker needed)
-                switchToLastInputMethod()
-            } else {
-                // Older: show the system IME picker
-                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showInputMethodPicker()
-            }
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showInputMethodPicker()
         }
 
         return view
