@@ -1,15 +1,13 @@
 package ai.voiceboard
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.ComponentActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 
 /**
  * One-time setup screen shown on launcher tap.
@@ -17,7 +15,7 @@ import androidx.core.content.ContextCompat
  *   1. Granting RECORD_AUDIO
  *   2. Opening Language & Input settings to enable VoiceBoard
  */
-class PermissionActivity : ComponentActivity() {
+class PermissionActivity : Activity() {
 
     private val RC_AUDIO = 1001
 
@@ -32,11 +30,10 @@ class PermissionActivity : ComponentActivity() {
         updateGrantButton(btnGrant, tvInstr)
 
         btnGrant.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED
             ) {
-                ActivityCompat.requestPermissions(
-                    this,
+                requestPermissions(
                     arrayOf(Manifest.permission.RECORD_AUDIO),
                     RC_AUDIO
                 )
@@ -56,7 +53,9 @@ class PermissionActivity : ComponentActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == RC_AUDIO) {
@@ -67,9 +66,8 @@ class PermissionActivity : ComponentActivity() {
     }
 
     private fun updateGrantButton(btn: Button, tv: TextView) {
-        val granted = ContextCompat.checkSelfPermission(
-            this, Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
+        val granted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED
 
         if (granted) {
             btn.text = "✓ Microphone granted"

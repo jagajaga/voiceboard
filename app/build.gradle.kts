@@ -31,7 +31,6 @@ android {
 
     buildFeatures {
         buildConfig = true
-        viewBinding = true
     }
 
     compileOptions {
@@ -46,6 +45,4 @@ android {
 dependencies {
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.core.ktx)
 }
