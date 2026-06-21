@@ -17,6 +17,32 @@ android {
         // No secrets in the APK — key is entered by the user in-app and stored in SharedPreferences
     }
 
+    // Stable signing: reads keystore from env vars injected by CI.
+    // Falls back to the default debug keystore when env vars are absent (local dev).
+    val keystorePath  = System.getenv("KEYSTORE_PATH")
+    val storePassword = System.getenv("STORE_PASSWORD")
+    val keyPassword   = System.getenv("KEY_PASSWORD")
+    val keyAlias      = System.getenv("KEY_ALIAS") ?: "voiceboard"
+
+    signingConfigs {
+        if (keystorePath != null && storePassword != null && keyPassword != null) {
+            create("release") {
+                storeFile     = file(keystorePath)
+                this.storePassword = storePassword
+                this.keyPassword   = keyPassword
+                this.keyAlias      = keyAlias
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            val releaseSigning = signingConfigs.findByName("release")
+            signingConfig = releaseSigning ?: signingConfigs.getByName("debug")
+        }
+    }
+
     buildFeatures {
         buildConfig = true
     }

@@ -22,15 +22,31 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Set up signing keystore
+        env:
+          KEYSTORE_BASE64:    ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD:     ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD:       ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > voiceboard.jks
+            echo "KEYSTORE_PATH=$PWD/voiceboard.jks"   >> $GITHUB_ENV
+            echo "STORE_PASSWORD=$STORE_PASSWORD"       >> $GITHUB_ENV
+            echo "KEY_PASSWORD=$KEY_PASSWORD"           >> $GITHUB_ENV
+            echo "KEY_ALIAS=voiceboard"                 >> $GITHUB_ENV
+          else
+            echo "No keystore secret — using debug signing (signatures will differ per run)"
+          fi
+
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Build APK
+        run: ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: voiceboard-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: voiceboard
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 30
