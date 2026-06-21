@@ -15,21 +15,10 @@ object ChatApi {
      */
     @Throws(IOException::class)
     fun rephrase(originalText: String, instruction: String, apiKey: String): String {
-        val json = """
-            {
-              "model": "gpt-5.5",
-              "messages": [
-                {
-                  "role": "system",
-                  "content": "You are a text editor. Rephrase the text the user provides according to their instructions. Return ONLY the rephrased text — no quotes, no explanation, nothing else."
-                },
-                {
-                  "role": "user",
-                  "content": "Original text:\n${originalText.replace("\"", "\\\"")}\n\nInstruction: ${instruction.replace("\"", "\\\"")}"
-                }
-              ],
-            }
-        """.trimIndent()
+        val system = "You are a text editor. Rephrase the text the user provides according to their instructions. Return ONLY the rephrased text — no quotes, no explanation, nothing else."
+        val user   = "Original text:\n${originalText}\n\nInstruction: ${instruction}"
+
+        val json = buildJsonRequest("gpt-5.5", system, user)
 
         val request = Request.Builder()
             .url("https://api.openai.com/v1/chat/completions")
@@ -47,7 +36,33 @@ object ChatApi {
         }
     }
 
-    /** Minimal extraction of choices[0].message.content from ChatGPT JSON */
+    // ── JSON helpers ───────────────────────────────────────────────────────────
+
+    /** Build a minimal chat-completions JSON payload with proper escaping. */
+    private fun buildJsonRequest(model: String, system: String, user: String): String {
+        return """{"model":${js(model)},"messages":[{"role":"system","content":${js(system)}},{"role":"user","content":${js(user)}}]}"""
+    }
+
+    /** JSON-encode a string value (including surrounding quotes). */
+    private fun js(s: String): String {
+        val sb = StringBuilder("\"")
+        for (c in s) {
+            when (c) {
+                '"'       -> sb.append("\\\"")
+                '\\'      -> sb.append("\\\\")
+                '\n'      -> sb.append("\\n")
+                '\r'      -> sb.append("\\r")
+                '\t'      -> sb.append("\\t")
+                '\b'      -> sb.append("\\b")
+                '\u000C'  -> sb.append("\\f")
+                else      -> if (c.code < 0x20) sb.append("\\u%04x".format(c.code)) else sb.append(c)
+            }
+        }
+        sb.append("\"")
+        return sb.toString()
+    }
+
+    /** Minimal extraction of choices[0].message.content from ChatGPT JSON. */
     private fun extractContent(json: String): String {
         val marker = "\"content\":"
         val idx = json.indexOf(marker)
@@ -55,7 +70,6 @@ object ChatApi {
         val afterColon = json.substring(idx + marker.length).trimStart()
         if (afterColon.startsWith("null")) throw IOException("Null content in response")
         val q1 = afterColon.indexOf('"')
-        // walk forward respecting escape sequences
         var i = q1 + 1
         val sb = StringBuilder()
         while (i < afterColon.length) {
