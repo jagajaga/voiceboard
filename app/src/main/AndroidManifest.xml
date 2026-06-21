@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:label="VoiceBoard"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <!--
+            PermissionActivity — shown once on first launch so the user can grant
+            RECORD_AUDIO before enabling VoiceBoard as the system keyboard.
+        -->
+        <activity
+            android:name=".PermissionActivity"
+            android:exported="true"
+            android:label="VoiceBoard Setup">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            The IME service itself. The subtype declares it as a keyboard for
+            any language so Android's input-method picker lists it.
+        -->
+        <service
+            android:name=".VoiceIMEService"
+            android:exported="true"
+            android:label="VoiceBoard"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
+        </service>
+
+    </application>
+</manifest>
