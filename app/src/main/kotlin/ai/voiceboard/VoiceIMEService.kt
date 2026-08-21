@@ -1,11 +1,15 @@
 package ai.voiceboard
 
+import android.content.ContentValues
 import android.inputmethodservice.InputMethodService
 import android.media.MediaRecorder
 import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.coroutines.*
 import java.io.File
@@ -24,10 +28,20 @@ class VoiceIMEService : InputMethodService() {
     // Selected text captured when Rephrase is tapped
     private var pendingSelectedText: String = ""
 
+    // ── Retry / save-audio state ─────────────────────────────────────────────
+    private var lastFailedFile: File? = null
+    private var lastFailedIsRephrase: Boolean = false
+    private var lastFailedSelectedText: String = ""
+    private var failureCount: Int = 0
+    private val SAVE_BUTTON_THRESHOLD = 3 // show "Save audio" once retry has failed this many times total
+
     // ── Views ──────────────────────────────────────────────────────────────────
     private lateinit var btnRecord:       Button
     private lateinit var btnRephrase:     Button
     private lateinit var btnAutoNewline:  Button
+    private lateinit var rowRetry:        LinearLayout
+    private lateinit var btnRetry:        Button
+    private lateinit var btnSaveAudio:    Button
     private lateinit var tvStatus:        TextView
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -44,6 +58,31 @@ class VoiceIMEService : InputMethodService() {
             val newState = !Prefs.getAutoNewline(applicationContext)
             Prefs.setAutoNewline(applicationContext, newState)
             updateAutoNewlineLabel()
+        }
+
+        rowRetry     = view.findViewById(R.id.rowRetry)
+        btnRetry     = view.findViewById(R.id.btnRetry)
+        btnSaveAudio = view.findViewById(R.id.btnSaveAudio)
+
+        btnRetry.setOnClickListener {
+            val file = lastFailedFile ?: return@setOnClickListener
+            rowRetry.visibility = View.GONE
+            if (lastFailedIsRephrase) processRephrase(file, lastFailedSelectedText)
+            else processDictation(file)
+        }
+
+        btnSaveAudio.setOnClickListener {
+            val file = lastFailedFile ?: return@setOnClickListener
+            val saved = saveAudioToDownloads(file)
+            if (saved) {
+                tvStatus.text = "✓ Saved to Downloads"
+                file.delete()
+                lastFailedFile = null
+                failureCount = 0
+                rowRetry.visibility = View.GONE
+            } else {
+                tvStatus.text = "Save failed — storage permission?"
+            }
         }
 
         btnRecord.setOnClickListener {
@@ -177,6 +216,7 @@ class VoiceIMEService : InputMethodService() {
         btnRecord.isEnabled = false
         btnRecord.text = "⏳  Transcribing…"
         tvStatus.text = ""
+        rowRetry.visibility = View.GONE
 
         scope.launch {
             val apiKey = Prefs.getApiKey(applicationContext)
@@ -185,9 +225,10 @@ class VoiceIMEService : InputMethodService() {
                     WhisperApi.transcribe(file, apiKey, Prefs.getModel(applicationContext))
                 }
             }
-            file.delete()
 
             result.onSuccess { text ->
+                file.delete()
+                onTranscribeSuccess()
                 if (text.isNotEmpty()) {
                     val suffix = if (Prefs.getAutoNewline(applicationContext)) "\n" else " "
                     currentInputConnection?.commitText("$text$suffix", 1)
@@ -196,6 +237,7 @@ class VoiceIMEService : InputMethodService() {
                     tvStatus.text = "Nothing heard — try again"
                 }
             }.onFailure {
+                onTranscribeFailure(file, isRephrase = false, selectedText = "")
                 tvStatus.text = "Error: ${it.message}"
             }
 
@@ -210,6 +252,7 @@ class VoiceIMEService : InputMethodService() {
         btnRephrase.isEnabled  = false
         btnRephrase.text = "⏳  Rephrasing…"
         tvStatus.text = ""
+        rowRetry.visibility = View.GONE
 
         scope.launch {
             val apiKey = Prefs.getApiKey(applicationContext)
@@ -220,9 +263,9 @@ class VoiceIMEService : InputMethodService() {
                     WhisperApi.transcribe(file, apiKey, Prefs.getModel(applicationContext))
                 }
             }
-            file.delete()
 
             if (instruction.isFailure || instruction.getOrDefault("").isEmpty()) {
+                onTranscribeFailure(file, isRephrase = true, selectedText = selectedText)
                 tvStatus.text = "Couldn't hear the instruction — try again"
                 resetUI(); return@launch
             }
@@ -237,6 +280,8 @@ class VoiceIMEService : InputMethodService() {
             }
 
             rephrased.onSuccess { text ->
+                file.delete()
+                onTranscribeSuccess()
                 if (text.isNotEmpty()) {
                     currentInputConnection?.commitText(text, 1)
                     tvStatus.text = "✓ Rephrased"
@@ -244,6 +289,7 @@ class VoiceIMEService : InputMethodService() {
                     tvStatus.text = "Empty result — try again"
                 }
             }.onFailure {
+                onTranscribeFailure(file, isRephrase = true, selectedText = selectedText)
                 tvStatus.text = "Error: ${it.message}"
             }
 

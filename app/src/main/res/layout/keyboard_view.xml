@@ -44,6 +44,43 @@
         android:ellipsize="none"
         android:paddingBottom="6dp" />
 
+    <!-- Retry / Save-audio row — visible only after a failed transcription -->
+    <LinearLayout
+        android:id="@+id/rowRetry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnRetry"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="1"
+            android:text="🔁  Retry"
+            android:textSize="14sp"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#4A3A28"
+            android:stateListAnimator="@null"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/btnSaveAudio"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_weight="1"
+            android:text="💾  Save audio"
+            android:textSize="14sp"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#4A3A28"
+            android:stateListAnimator="@null"
+            android:layout_marginStart="4dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
     <!-- Rephrase button — visible only when text is selected -->
     <Button
         android:id="@+id/btnRephrase"
