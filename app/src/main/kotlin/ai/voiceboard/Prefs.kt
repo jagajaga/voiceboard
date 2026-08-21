@@ -6,6 +6,7 @@ object Prefs {
     private const val FILE = "voiceboard_prefs"
     private const val KEY_API_KEY = "openai_api_key"
     private const val KEY_MODEL   = "whisper_model"
+    private const val KEY_AUTO_NEWLINE = "auto_newline"
     private const val DEFAULT_MODEL = "gpt-4o-transcribe"
 
     fun getApiKey(ctx: Context): String =
@@ -21,4 +22,12 @@ object Prefs {
             .getString(KEY_MODEL, DEFAULT_MODEL) ?: DEFAULT_MODEL
 
     fun hasApiKey(ctx: Context): Boolean = getApiKey(ctx).isNotEmpty()
+
+    fun getAutoNewline(ctx: Context): Boolean =
+        ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .getBoolean(KEY_AUTO_NEWLINE, false)
+
+    fun setAutoNewline(ctx: Context, enabled: Boolean) =
+        ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_AUTO_NEWLINE, enabled).apply()
 }

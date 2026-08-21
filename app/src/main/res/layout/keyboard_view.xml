@@ -6,6 +6,30 @@
     android:background="#141A12"
     android:padding="12dp">
 
+    <!-- Top row: Auto-newline toggle -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginBottom="4dp">
+
+        <Button
+            android:id="@+id/btnAutoNewline"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="↵  New line: off"
+            android:textSize="11sp"
+            android:textColor="#7A8A74"
+            android:backgroundTint="#1F2A1D"
+            android:stateListAnimator="@null" />
+
+    </LinearLayout>
+
     <!-- Status / transcript preview -->
     <TextView
         android:id="@+id/tvStatus"

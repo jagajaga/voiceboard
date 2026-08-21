@@ -25,17 +25,26 @@ class VoiceIMEService : InputMethodService() {
     private var pendingSelectedText: String = ""
 
     // ── Views ──────────────────────────────────────────────────────────────────
-    private lateinit var btnRecord:   Button
-    private lateinit var btnRephrase: Button
-    private lateinit var tvStatus:    TextView
+    private lateinit var btnRecord:       Button
+    private lateinit var btnRephrase:     Button
+    private lateinit var btnAutoNewline:  Button
+    private lateinit var tvStatus:        TextView
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
 
     override fun onCreateInputView(): View {
         val view = layoutInflater.inflate(R.layout.keyboard_view, null)
-        btnRecord   = view.findViewById(R.id.btnRecord)
-        btnRephrase = view.findViewById(R.id.btnRephrase)
-        tvStatus    = view.findViewById(R.id.tvStatus)
+        btnRecord      = view.findViewById(R.id.btnRecord)
+        btnRephrase    = view.findViewById(R.id.btnRephrase)
+        btnAutoNewline = view.findViewById(R.id.btnAutoNewline)
+        tvStatus       = view.findViewById(R.id.tvStatus)
+
+        updateAutoNewlineLabel()
+        btnAutoNewline.setOnClickListener {
+            val newState = !Prefs.getAutoNewline(applicationContext)
+            Prefs.setAutoNewline(applicationContext, newState)
+            updateAutoNewlineLabel()
+        }
 
         btnRecord.setOnClickListener {
             when (mode) {
@@ -180,7 +189,8 @@ class VoiceIMEService : InputMethodService() {
 
             result.onSuccess { text ->
                 if (text.isNotEmpty()) {
-                    currentInputConnection?.commitText("$text ", 1)
+                    val suffix = if (Prefs.getAutoNewline(applicationContext)) "\n" else " "
+                    currentInputConnection?.commitText("$text$suffix", 1)
                     tvStatus.text = "✓ Done"
                 } else {
                     tvStatus.text = "Nothing heard — try again"
@@ -242,6 +252,14 @@ class VoiceIMEService : InputMethodService() {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private fun updateAutoNewlineLabel() {
+        val on = Prefs.getAutoNewline(applicationContext)
+        btnAutoNewline.text = if (on) "↵  New line: on" else "↵  New line: off"
+        btnAutoNewline.setTextColor(if (on) 0xFFB8D8A8.toInt() else 0xFF7A8A74.toInt())
+        btnAutoNewline.backgroundTintList =
+            android.content.res.ColorStateList.valueOf(if (on) 0xFF2A4A20.toInt() else 0xFF1F2A1D.toInt())
+    }
 
     private fun resetUI() {
         btnRecord.isEnabled = true
