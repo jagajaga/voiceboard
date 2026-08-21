@@ -299,6 +299,50 @@ class VoiceIMEService : InputMethodService() {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    private fun onTranscribeSuccess() {
+        failureCount = 0
+        lastFailedFile = null
+        rowRetry.visibility = View.GONE
+    }
+
+    private fun onTranscribeFailure(file: File, isRephrase: Boolean, selectedText: String) {
+        lastFailedFile = file
+        lastFailedIsRephrase = isRephrase
+        lastFailedSelectedText = selectedText
+        failureCount++
+
+        rowRetry.visibility = View.VISIBLE
+        btnSaveAudio.visibility = if (failureCount >= SAVE_BUTTON_THRESHOLD) View.VISIBLE else View.GONE
+    }
+
+    /** Copies the recorded .m4a into the public Downloads folder so the user can grab it manually. */
+    private fun saveAudioToDownloads(file: File): Boolean = try {
+        val name = "voiceboard_${System.currentTimeMillis()}.m4a"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+                put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            }
+            val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+            if (uri != null) {
+                contentResolver.openOutputStream(uri)?.use { out ->
+                    file.inputStream().use { it.copyTo(out) }
+                }
+                true
+            } else false
+        } else {
+            @Suppress("DEPRECATION")
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            downloadsDir.mkdirs()
+            val dest = File(downloadsDir, name)
+            file.copyTo(dest, overwrite = true)
+            true
+        }
+    } catch (e: Exception) {
+        false
+    }
+
     private fun updateAutoNewlineLabel() {
         val on = Prefs.getAutoNewline(applicationContext)
         btnAutoNewline.text = if (on) "↵  New line: on" else "↵  New line: off"
