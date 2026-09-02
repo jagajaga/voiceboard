@@ -6,6 +6,15 @@
     android:background="#141A12"
     android:padding="12dp">
 
+    <!-- Live waveform — thin, long, sits above everything; visible only while recording,
+         replacing the old "Recording…" text entirely. -->
+    <ai.voiceboard.WaveformView
+        android:id="@+id/waveform"
+        android:layout_width="match_parent"
+        android:layout_height="22dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone" />
+
     <!-- Status / transcript preview -->
     <TextView
         android:id="@+id/tvStatus"
@@ -33,7 +42,7 @@
         <Button
             android:id="@+id/btnRetry"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:text="🔁  Retry"
             android:textSize="14sp"
@@ -45,7 +54,7 @@
         <Button
             android:id="@+id/btnSaveAudio"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:text="💾  Save audio"
             android:textSize="14sp"
@@ -61,7 +70,7 @@
     <Button
         android:id="@+id/btnRephrase"
         android:layout_width="match_parent"
-        android:layout_height="46dp"
+        android:layout_height="35dp"
         android:text="✏️  Rephrase selection"
         android:textSize="14sp"
         android:textColor="#E8EDE3"
@@ -74,7 +83,7 @@
     <Button
         android:id="@+id/btnRecord"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="51dp"
         android:text="🎤  Record"
         android:textSize="19sp"
         android:textColor="#E8EDE3"
@@ -92,7 +101,7 @@
         <Button
             android:id="@+id/btnAutoNewline"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:text="↵  New line: off"
             android:textSize="12sp"
@@ -104,7 +113,7 @@
         <Button
             android:id="@+id/btnDelete"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:text="⌫  Delete"
             android:textSize="14sp"
@@ -116,7 +125,7 @@
         <Button
             android:id="@+id/btnSwitch"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:text="⌨  Keyboard"
             android:textSize="14sp"

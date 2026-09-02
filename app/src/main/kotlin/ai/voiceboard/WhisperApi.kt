@@ -20,12 +20,14 @@ object WhisperApi {
      */
     @Throws(IOException::class)
     fun transcribe(audioFile: File, apiKey: String, model: String): String {
+        val mime = if (audioFile.extension.equals("wav", ignoreCase = true))
+            "audio/wav" else "audio/m4a"
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
                 "file",
                 audioFile.name,
-                audioFile.asRequestBody("audio/m4a".toMediaType())
+                audioFile.asRequestBody(mime.toMediaType())
             )
             .addFormDataPart("model", model)
             .build()

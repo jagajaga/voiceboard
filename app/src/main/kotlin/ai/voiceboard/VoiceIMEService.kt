@@ -2,7 +2,6 @@ package ai.voiceboard
 
 import android.content.ContentValues
 import android.inputmethodservice.InputMethodService
-import android.media.MediaRecorder
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -19,7 +18,10 @@ class VoiceIMEService : InputMethodService() {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     // ── Recording state ────────────────────────────────────────────────────────
-    private var recorder: MediaRecorder? = null
+    // WavRecorder replaces MediaRecorder: raw AudioRecord PCM->WAV capture means the last
+    // read() before stop() is guaranteed to be on disk — no async AAC-encoder flush race,
+    // which was the cause of dropped last-seconds audio (see WavRecorder.kt for details).
+    private var recorder: WavRecorder? = null
     private var audioFile: File? = null
 
     private enum class Mode { IDLE, RECORDING_DICTATE, RECORDING_REPHRASE }
@@ -43,6 +45,7 @@ class VoiceIMEService : InputMethodService() {
     private lateinit var btnRetry:        Button
     private lateinit var btnSaveAudio:    Button
     private lateinit var tvStatus:        TextView
+    private lateinit var waveform:        WaveformView
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -52,6 +55,7 @@ class VoiceIMEService : InputMethodService() {
         btnRephrase    = view.findViewById(R.id.btnRephrase)
         btnAutoNewline = view.findViewById(R.id.btnAutoNewline)
         tvStatus       = view.findViewById(R.id.tvStatus)
+        waveform       = view.findViewById(R.id.waveform)
 
         updateAutoNewlineLabel()
         btnAutoNewline.setOnClickListener {
@@ -140,7 +144,7 @@ class VoiceIMEService : InputMethodService() {
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
-        recorder?.release()
+        recorder?.stop()
         recorder = null
     }
 
@@ -152,21 +156,14 @@ class VoiceIMEService : InputMethodService() {
             return
         }
 
-        val file = File(cacheDir, "voiceboard_${System.currentTimeMillis()}.m4a")
-        audioFile = file
-
-        recorder = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            MediaRecorder(this) else @Suppress("DEPRECATION") MediaRecorder()
-        ).apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setAudioSamplingRate(16_000)
-            setAudioEncodingBitRate(64_000)
-            setOutputFile(file.absolutePath)
-            prepare()
-            start()
+        waveform.reset()
+        waveform.visibility = View.VISIBLE
+        val rec = WavRecorder(sampleRate = 16_000) { level ->
+            // Callback fires from the recording thread — hop back to main for the view.
+            mainHandler.post { waveform.pushAmplitude(level) }
         }
+        recorder = rec
+        audioFile = rec.start(cacheDir)
 
         mode = target
         btnRephrase.visibility = View.GONE
@@ -176,32 +173,38 @@ class VoiceIMEService : InputMethodService() {
                 btnRecord.text = "⏹  Stop"
                 btnRecord.backgroundTintList =
                     android.content.res.ColorStateList.valueOf(0xFF5C2A2A.toInt())
-                tvStatus.text = "Recording…"
+                tvStatus.text = ""
             }
             Mode.RECORDING_REPHRASE -> {
                 btnRephrase.visibility = View.VISIBLE
                 btnRephrase.text = "⏹  Stop instruction"
                 btnRephrase.backgroundTintList =
                     android.content.res.ColorStateList.valueOf(0xFF5C2A2A.toInt())
-                tvStatus.text = "Say how to rephrase…"
+                tvStatus.text = ""
             }
             else -> {}
         }
     }
 
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
     private fun stopRecording() {
         val capturedMode = mode
         mode = Mode.IDLE
 
-        try {
-            recorder?.apply { stop(); release() }
+        waveform.visibility = View.GONE
+
+        val file = try {
+            recorder?.stop() ?: audioFile
         } catch (_: Exception) {
+            audioFile
         } finally {
             recorder = null
         }
 
-        val file = audioFile ?: run { resetUI(); return }
         audioFile = null
+
+        if (file == null) { resetUI(); return }
 
         when (capturedMode) {
             Mode.RECORDING_DICTATE  -> processDictation(file)
@@ -315,13 +318,13 @@ class VoiceIMEService : InputMethodService() {
         btnSaveAudio.visibility = if (failureCount >= SAVE_BUTTON_THRESHOLD) View.VISIBLE else View.GONE
     }
 
-    /** Copies the recorded .m4a into the public Downloads folder so the user can grab it manually. */
+    /** Copies the recorded .wav into the public Downloads folder so the user can grab it manually. */
     private fun saveAudioToDownloads(file: File): Boolean = try {
-        val name = "voiceboard_${System.currentTimeMillis()}.m4a"
+        val name = "voiceboard_${System.currentTimeMillis()}.wav"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val values = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-                put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4")
+                put(MediaStore.MediaColumns.MIME_TYPE, "audio/wav")
                 put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
             }
             val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
