@@ -57,11 +57,54 @@
             android:backgroundTint="#2D3830"
             android:layout_marginBottom="28dp" />
 
-        <!-- Step 3: API key -->
+        <!-- Step 3: ElevenLabs API key (dictation / Scribe v2) -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="OpenAI API Key"
+            android:text="ElevenLabs API Key (dictation — Scribe v2)"
+            android:textColor="#A8B4A2"
+            android:textSize="13sp"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etElevenLabsKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="xi-api-key..."
+            android:textColor="#E8EDE3"
+            android:textColorHint="#4A5A44"
+            android:background="#1E2820"
+            android:padding="12dp"
+            android:inputType="textPassword"
+            android:imeOptions="actionDone"
+            android:fontFamily="monospace"
+            android:textSize="13sp"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/btnSaveElevenLabsKey"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Save ElevenLabs Key"
+            android:textColor="#E8EDE3"
+            android:backgroundTint="#3A4438"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvElevenLabsKeyStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#7A9A74"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Step 4: OpenAI API key (rephrase only) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OpenAI API Key (Rephrase only)"
             android:textColor="#A8B4A2"
             android:textSize="13sp"
             android:layout_marginBottom="6dp" />

@@ -151,8 +151,8 @@ class VoiceIMEService : InputMethodService() {
     // ── Recording ──────────────────────────────────────────────────────────────
 
     private fun startRecording(target: Mode) {
-        if (!Prefs.hasApiKey(applicationContext)) {
-            tvStatus.text = "⚠ No API key — open VoiceBoard app to set it"
+        if (!Prefs.hasElevenLabsApiKey(applicationContext)) {
+            tvStatus.text = "⚠ No ElevenLabs API key — open VoiceBoard app to set it"
             return
         }
 
@@ -222,10 +222,10 @@ class VoiceIMEService : InputMethodService() {
         rowRetry.visibility = View.GONE
 
         scope.launch {
-            val apiKey = Prefs.getApiKey(applicationContext)
+            val apiKey = Prefs.getElevenLabsApiKey(applicationContext)
             val result = withContext(Dispatchers.IO) {
                 runCatching {
-                    WhisperApi.transcribe(file, apiKey, Prefs.getModel(applicationContext))
+                    ElevenLabsApi.transcribe(file, apiKey, Prefs.getModel(applicationContext))
                 }
             }
 
@@ -258,12 +258,13 @@ class VoiceIMEService : InputMethodService() {
         rowRetry.visibility = View.GONE
 
         scope.launch {
-            val apiKey = Prefs.getApiKey(applicationContext)
+            val elApiKey = Prefs.getElevenLabsApiKey(applicationContext)
+            val oaApiKey = Prefs.getApiKey(applicationContext)
 
-            // Step 1: transcribe the voice instruction
+            // Step 1: transcribe the voice instruction (ElevenLabs Scribe v2)
             val instruction = withContext(Dispatchers.IO) {
                 runCatching {
-                    WhisperApi.transcribe(file, apiKey, Prefs.getModel(applicationContext))
+                    ElevenLabsApi.transcribe(file, elApiKey, Prefs.getModel(applicationContext))
                 }
             }
 
@@ -275,10 +276,10 @@ class VoiceIMEService : InputMethodService() {
 
             tvStatus.text = "\"${instruction.getOrDefault("")}\""
 
-            // Step 2: rephrase with GPT-4o-mini
+            // Step 2: rephrase with GPT-5.5 (still OpenAI)
             val rephrased = withContext(Dispatchers.IO) {
                 runCatching {
-                    ChatApi.rephrase(selectedText, instruction.getOrDefault(""), apiKey)
+                    ChatApi.rephrase(selectedText, instruction.getOrDefault(""), oaApiKey)
                 }
             }
 

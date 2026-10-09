@@ -14,7 +14,7 @@ Direct `.apk` — no unzipping needed. Built automatically on every push to `mai
 
 ### 🎤 Voice Dictation
 Tap **Record** → speak → tap **Stop**. Transcribed text is inserted at the cursor.
-Powered by OpenAI **gpt-4o-transcribe**.
+Powered by ElevenLabs **Scribe v2** (their latest/most accurate speech-to-text model).
 
 ### ✏️ AI Rephrase
 Select any text in any app → **Rephrase selection** button appears.
@@ -35,10 +35,11 @@ Instantly brings up the system keyboard picker to jump back to Gboard or any oth
 2. Open the **VoiceBoard** app:
    - Grant **Microphone** permission
    - Tap **Open Input Method Settings** → enable VoiceBoard
-   - Paste your **OpenAI API key** → Save
+   - Paste your **ElevenLabs API key** (dictation, Scribe v2) → Save
+   - Paste your **OpenAI API key** (Rephrase only) → Save
 3. In any text field, tap the keyboard globe/switch icon → select **VoiceBoard**
 
-Your API key is stored on-device only (SharedPreferences). It is never compiled into the APK.
+Both API keys are stored on-device only (SharedPreferences). Neither is ever compiled into the APK.
 
 ---
 
@@ -60,7 +61,7 @@ Signing uses the keystore at `$KEYSTORE_PATH` (env var). Falls back to the debug
 |---|---|
 | Platform | Android IME (`InputMethodService`), min SDK 26 (Android 8) |
 | Language | Kotlin |
-| Transcription | OpenAI `gpt-4o-transcribe` via `/v1/audio/transcriptions` |
+| Transcription | ElevenLabs `scribe_v2` via `/v1/speech-to-text` |
 | Rephrase | OpenAI `gpt-5.5` via `/v1/chat/completions` |
 | Networking | OkHttp |
 | Async | Kotlin Coroutines |

@@ -30,12 +30,20 @@ class PermissionActivity : Activity() {
         val etApiKey    = findViewById<EditText>(R.id.etApiKey)
         val btnSaveKey  = findViewById<Button>(R.id.btnSaveKey)
         val tvKeyStatus = findViewById<TextView>(R.id.tvKeyStatus)
+        val etElevenLabsKey    = findViewById<EditText>(R.id.etElevenLabsKey)
+        val btnSaveElevenLabsKey = findViewById<Button>(R.id.btnSaveElevenLabsKey)
+        val tvElevenLabsKeyStatus = findViewById<TextView>(R.id.tvElevenLabsKeyStatus)
 
         // Pre-fill if already saved
         val saved = Prefs.getApiKey(this)
         if (saved.isNotEmpty()) {
             etApiKey.setText(saved)
             tvKeyStatus.text = "✓ Key saved"
+        }
+        val savedEl = Prefs.getElevenLabsApiKey(this)
+        if (savedEl.isNotEmpty()) {
+            etElevenLabsKey.setText(savedEl)
+            tvElevenLabsKeyStatus.text = "✓ Key saved"
         }
 
         updateGrantButton(btnGrant, tvInstr)
@@ -60,13 +68,29 @@ class PermissionActivity : Activity() {
             }
             Prefs.setApiKey(this, key)
             tvKeyStatus.text = "✓ Key saved"
-            Toast.makeText(this, "API key saved", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "OpenAI key saved", Toast.LENGTH_SHORT).show()
+        }
+
+        btnSaveElevenLabsKey.setOnClickListener {
+            val key = etElevenLabsKey.text.toString().trim()
+            if (key.isEmpty()) {
+                tvElevenLabsKeyStatus.text = "Key cannot be empty"
+                return@setOnClickListener
+            }
+            Prefs.setElevenLabsApiKey(this, key)
+            tvElevenLabsKeyStatus.text = "✓ Key saved"
+            Toast.makeText(this, "ElevenLabs key saved", Toast.LENGTH_SHORT).show()
         }
 
         // Allow saving with the keyboard Done action
         etApiKey.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 btnSaveKey.performClick(); true
+            } else false
+        }
+        etElevenLabsKey.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                btnSaveElevenLabsKey.performClick(); true
             } else false
         }
     }
