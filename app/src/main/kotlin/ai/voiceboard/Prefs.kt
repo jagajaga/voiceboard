@@ -8,6 +8,7 @@ object Prefs {
     private const val KEY_ELEVENLABS_API_KEY = "elevenlabs_api_key"
     private const val KEY_MODEL   = "whisper_model"
     private const val KEY_AUTO_NEWLINE = "auto_newline"
+    private const val KEY_CLEAN_DICTATION = "clean_dictation"
     private const val DEFAULT_MODEL = "scribe_v2"
 
     /** OpenAI key — still used for Rephrase (gpt-5.5). */
@@ -43,4 +44,13 @@ object Prefs {
     fun setAutoNewline(ctx: Context, enabled: Boolean) =
         ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
             .edit().putBoolean(KEY_AUTO_NEWLINE, enabled).apply()
+
+    /** Clean up dictation with GPT-5.5 before inserting it (removes "um"/"uh", false starts, etc). On by default. */
+    fun getCleanDictation(ctx: Context): Boolean =
+        ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .getBoolean(KEY_CLEAN_DICTATION, true)
+
+    fun setCleanDictation(ctx: Context, enabled: Boolean) =
+        ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_CLEAN_DICTATION, enabled).apply()
 }

@@ -229,10 +229,11 @@ class VoiceIMEService : InputMethodService() {
                 }
             }
 
-            result.onSuccess { text ->
+            result.onSuccess { rawText ->
                 file.delete()
                 onTranscribeSuccess()
-                if (text.isNotEmpty()) {
+                if (rawText.isNotEmpty()) {
+                    val text = cleanUpDictation(rawText)
                     val suffix = if (Prefs.getAutoNewline(applicationContext)) "\n" else " "
                     currentInputConnection?.commitText("$text$suffix", 1)
                     tvStatus.text = "✓ Done"
@@ -246,6 +247,19 @@ class VoiceIMEService : InputMethodService() {
 
             resetUI()
         }
+    }
+
+    /**
+     * Pass raw dictation through GPT-5.5 to strip "um"/"uh", false starts and stutter-repeats so
+     * it reads like typed text, in whatever language it was spoken. Best-effort: if cleanup is
+     * off, there's no OpenAI key, or the call fails, the raw transcript is used as-is — a failed
+     * cleanup must never cost the user their dictation.
+     */
+    private suspend fun cleanUpDictation(rawText: String): String {
+        if (!Prefs.getCleanDictation(applicationContext) || !Prefs.hasApiKey(applicationContext)) return rawText
+        return withContext(Dispatchers.IO) {
+            runCatching { ChatApi.cleanDictation(rawText, Prefs.getApiKey(applicationContext)) }
+        }.getOrNull()?.takeIf { it.isNotBlank() } ?: rawText
     }
 
     // ── Rephrase ──────────────────────────────────────────────────────────────

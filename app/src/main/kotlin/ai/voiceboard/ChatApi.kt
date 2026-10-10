@@ -21,7 +21,40 @@ object ChatApi {
     fun rephrase(originalText: String, instruction: String, apiKey: String): String {
         val system = "You are a text editor. Rephrase the text the user provides according to their instructions. Return ONLY the rephrased text — no quotes, no explanation, nothing else."
         val user   = "Original text:\n${originalText}\n\nInstruction: ${instruction}"
+        return chatCompletion(system, user, apiKey)
+    }
 
+    /**
+     * Clean up a raw speech-to-text dictation transcript so it reads like text the speaker
+     * typed themselves, in whatever language it is. Fixed system prompt (not user-editable) so
+     * dictation cleanup can't be hijacked by spoken "instructions" — unlike [rephrase], which is
+     * deliberately instruction-driven.
+     */
+    @Throws(IOException::class)
+    fun cleanDictation(rawText: String, apiKey: String): String {
+        val system = """
+            You clean up raw speech-to-text dictation so it reads like text the speaker typed
+            themselves — in whatever language it's in. Never translate or switch language, no
+            matter what language appears.
+
+            Rules:
+            - Remove filler words and disfluencies (um, uh, er, like, you know, I mean, kind of,
+              "so yeah" — and their equivalents in any language).
+            - Resolve false starts and self-corrections: keep only the final, intended version of
+              each thought; drop the abandoned fragment entirely.
+            - Collapse stutter-repeated words or phrases into one.
+            - Fix punctuation, capitalization, and sentence breaks so it reads naturally.
+            - Preserve every fact, name, number, and opinion exactly as spoken. Never add, remove,
+              reinterpret, or summarize content. Keep the speaker's own wording — this is light
+              cleanup, not a rewrite.
+            - Output ONLY the cleaned text. No quotes, no notes, no explanation.
+        """.trimIndent()
+        return chatCompletion(system, rawText, apiKey)
+    }
+
+    /** Shared chat-completions call: system + user message in, raw content string out. */
+    @Throws(IOException::class)
+    private fun chatCompletion(system: String, user: String, apiKey: String): String {
         val json = buildJsonRequest("gpt-5.5", system, user)
 
         val request = Request.Builder()
